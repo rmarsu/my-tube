@@ -1,0 +1,18 @@
+< FATAL>:(!! > 2024/11/21 15:03:46 logger.go:64: failed to connect to the database: failed to connect to `user=rmarsu database=`: /tmp/.s.PGSQL.5432 (/tmp): dial error: dial unix /tmp/.s.PGSQL.5432: connect: no such file or directory
+< FATAL>:(!! > 2024/11/21 15:17:57 logger.go:64: failed to connect to the database: failed to connect to `user=rmarsu database=`: /tmp/.s.PGSQL.5432 (/tmp): dial error: dial unix /tmp/.s.PGSQL.5432: connect: no such file or directory
+< FATAL>:(!! > 2024/11/21 15:18:35 logger.go:64: failed to connect to the database: failed to connect to `user=myTube database=MyTube`:
+	127.0.0.1:5432 (localhost): dial error: dial tcp 127.0.0.1:5432: connect: connection refused
+	127.0.0.1:5432 (localhost): dial error: dial tcp 127.0.0.1:5432: connect: connection refused
+< FATAL>:(!! > 2024/11/21 15:18:52 logger.go:64: failed to connect to the database: failed to connect to `user=rmarsu database=myTube`:
+	127.0.0.1:5432 (localhost): dial error: dial tcp 127.0.0.1:5432: connect: connection refused
+	127.0.0.1:5432 (localhost): dial error: dial tcp 127.0.0.1:5432: connect: connection refused
+< FATAL>:(!! > 2024/11/21 15:20:06 logger.go:64: failed to connect to the database: failed to connect to `user=myTube database=myTube`:
+	127.0.0.1:5432 (localhost): dial error: dial tcp 127.0.0.1:5432: connect: connection refused
+	127.0.0.1:5432 (localhost): dial error: dial tcp 127.0.0.1:5432: connect: connection refused
+< FATAL>:(!! > 2024/11/21 15:23:06 logger.go:64: failed to connect to the database: failed to connect to `user=postgres database=myTube`:
+	127.0.0.1:5432 (localhost): dial error: dial tcp 127.0.0.1:5432: connect: connection refused
+	127.0.0.1:5432 (localhost): dial error: dial tcp 127.0.0.1:5432: connect: connection refused
+< FATAL>:(!! > 2024/11/21 15:28:38 logger.go:64: failed to connect to the database: failed to connect to `user=postgres database=myTube`:
+	127.0.0.1:5432 (localhost): dial error: dial tcp 127.0.0.1:5432: connect: connection refused
+	127.0.0.1:5432 (localhost): dial error: dial tcp 127.0.0.1:5432: connect: connection refused
+< FATAL>:(!! > 2024/11/21 15:34:00 logger.go:64: failed to connect to the database: failed to connect to `user=postgres database=myTube`: 127.0.0.1:5432 (localhost): dial error: dial tcp 127.0.0.1:5432: connect: connection refused

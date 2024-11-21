@@ -1,0 +1,10 @@
+port : 8080
+
+database :
+  host : "nothing"
+  port : 5432
+  username : "postgres"
+  password : "your_password"
+  name : "your_database_name"
+  salt : "nuziTheBest"
+  

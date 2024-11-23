@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"os"
 	"path/filepath"
 )
@@ -17,30 +18,31 @@ func FileExists(path string) bool {
 	return true
 }
 
-func SaveFile(file *os.File) (string, error) {
-	basePath := "uploads/video_"
-	filePath := filepath.Join(basePath, file.Name())
+func SaveFile(file multipart.File, header *multipart.FileHeader) (string, error) {
 
-	// Проверка существования файла и добавление цифры, если необходимо
+
+	basePath := "uploads/video_"
+	filePath := filepath.Join(basePath, header.Filename)
+
 	i := 1
 	for {
 		if _, err := os.Stat(filePath); os.IsNotExist(err) {
 			break
 		}
-		filePath = filepath.Join(basePath, fmt.Sprintf("%s(%d)", file.Name(), i))
+		filePath = filepath.Join(basePath, fmt.Sprintf("%s(%d)", header.Filename, i))
 		i++
 	}
 
-	file , err := os.Create(filePath)
+	fileNew , err := os.Create(filePath)
 	if err!= nil {
           return "", err
      }
-	defer file.Close()
+	defer fileNew.Close()
 
-	w := bufio.NewWriter(file)
+	w := bufio.NewWriter(fileNew)
 	buf := make([]byte, 1024)
 	for {
-		n , err := file.Read(buf)
+		n , err := fileNew.Read(buf)
 		if err != nil && err != io.EOF {
 			panic(err)
 		}

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"myTube/internal/models"
 	"myTube/internal/service"
+	"myTube/pkg/helper"
 	"myTube/pkg/log"
 	"net/http"
 	"strconv"
@@ -40,6 +41,8 @@ func (h *Handler) GetVideoByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) CreateVideo(w http.ResponseWriter, r *http.Request) {
+	r.ParseMultipartForm(32 << 20)
+
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
 		http.Error(w, "Please login", http.StatusUnauthorized)
@@ -62,10 +65,31 @@ func (h *Handler) CreateVideo(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	thumbnailFilePath := ""
-	videoFilePath := ""
-	// TODO upload thumbnail file logic here
-	// TODO add file upload logic here
+	var videoFilePath , thumbnailFilePath string
+
+	videoFile , header , err := r.FormFile("video")
+	if err!= nil {
+          http.Error(w, err.Error(), http.StatusBadRequest)
+          return
+     }
+	defer videoFile.Close()
+
+	videoFilePath, err = helper.SaveFile(videoFile, header)
+	if err!= nil {
+          http.Error(w, err.Error(), http.StatusInternalServerError)
+          return
+     }
+	thumbnailFile, header, err := r.FormFile("thumbnail")
+	if err!= nil {
+          http.Error(w, err.Error(), http.StatusBadRequest)
+          return
+     }
+	defer thumbnailFile.Close()
+	thumbnailFilePath, err = helper.SaveFile(thumbnailFile, header)
+	if err!= nil {
+          http.Error(w, err.Error(), http.StatusInternalServerError)
+          return
+     }
 
 	video := models.Video{
 		AuthorID:    userId,

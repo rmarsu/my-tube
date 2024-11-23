@@ -60,7 +60,10 @@ func (h *Handler) CreateVideo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var videoSettings service.VideoInput
-	err = json.NewDecoder(r.Body).Decode(&videoSettings)
+	
+	//get json from data
+	data := r.FormValue("data")
+	err = json.Unmarshal([]byte(data), &videoSettings)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

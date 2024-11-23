@@ -18,3 +18,4 @@ func CorsMiddleware(next http.Handler) http.Handler{
 		}
 	})
 }
+

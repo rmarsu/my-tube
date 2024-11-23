@@ -9,6 +9,11 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+type MyCustomClaims struct {
+	Id string `json:"id"`
+	jwt.RegisteredClaims
+}
+
 var (
 	ErrInvalidCredentials = errors.New("invalid credentials")
 )
@@ -32,10 +37,18 @@ func NewManager(signingKey string) (*Manager, error) {
 }
 
 func (m *Manager) NewJWT(userId string, ttl time.Duration) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(ttl)),
-		Subject:   userId,
-	})
+	claims := MyCustomClaims{
+		userId,
+		jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(ttl)),
+			Subject:   userId,
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			Issuer:   "myTube",
+			Audience: []string{"*"},
+			NotBefore: jwt.NewNumericDate(time.Now()),		
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	return token.SignedString([]byte(m.signingKey))
 }
@@ -71,4 +84,13 @@ func (m *Manager) NewRefreshToken() (string, error) {
 	}
 
 	return fmt.Sprintf("%x", b), nil
+}
+
+func (m *Manager) ExtractUserIdFromToken(accessToken string) (string, error) {
+	userId, err := m.Parse(accessToken)
+     if err!= nil {
+          return "", err
+     }
+
+     return userId, nil
 }

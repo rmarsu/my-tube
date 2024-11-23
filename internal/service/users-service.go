@@ -6,6 +6,7 @@ import (
 	"myTube/internal/repository"
 	"myTube/pkg/auth"
 	"myTube/pkg/hash"
+	"myTube/pkg/log"
 	"strconv"
 	"time"
 )
@@ -36,22 +37,26 @@ func (s *UsersService) SignUp(ctx context.Context , input UserSignUpInput) (Toke
           return Tokens{} ,err
      }
 	user := models.User{
-		ID:        0, 
           Username: input.Username,
           Email:    input.Email,
           Password: passwordHash,
 		CreatedAt: time.Now(),
-		Videos:    []models.Video{},
      }
 	err = s.repo.Create(user)
 	if err!= nil {
           return Tokens{}, err
      }
-	return s.createSession(user.ID)
+
+	newUser, err := s.repo.GetByUsername(ctx, input.Username)
+	if err!= nil {
+          return Tokens{}, err
+     }
+	return s.createSession(newUser.ID)
 }
 
 func (s *UsersService) SignIn(ctx context.Context, input UserSignInInput) (Tokens, error) {
 	passwordHash, err := s.hasher.Hash(input.Password)
+	log.Debug(passwordHash)
 	if err != nil {
           return Tokens{}, err
      }
@@ -59,24 +64,33 @@ func (s *UsersService) SignIn(ctx context.Context, input UserSignInInput) (Token
 	if err!= nil {
           return Tokens{}, err
      }
-	if passwordHash == input.Password {
+	if passwordHash == user.Password {
 		return s.createSession(user.ID)
      }
      return Tokens{}, auth.ErrInvalidCredentials
 }
 
 func (s *UsersService) createSession(userID int) (Tokens, error) {
-	var (
-		res Tokens
-		err error
-	)
-	res.AccessToken , err = s.tokenManager.NewJWT(strconv.Itoa(userID), s.accessTokenTTL)
-	if err!= nil {
-          return res, err
+	accessToken , err := s.tokenManager.NewJWT(strconv.Itoa(userID), s.accessTokenTTL)
+	if err != nil {
+          return Tokens{}, err
      }
-	res.RefreshToken , err = s.tokenManager.NewRefreshToken()
+	refreshToken , err := s.tokenManager.NewRefreshToken()
 	if err!= nil {
-          return res, err
+          return Tokens{}, err
      }
-	return res, nil
+	return Tokens{
+		AccessToken:  accessToken,
+          RefreshToken: refreshToken,
+     }, nil	
 }
+
+func (s *UsersService) GetUserIdFromToken(ctx context.Context, token string) (string, error) {
+	userID, err := s.tokenManager.Parse(token)
+     if err!= nil {
+          return "", err
+     }
+     return userID, nil
+}
+
+

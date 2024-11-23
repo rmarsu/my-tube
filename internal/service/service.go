@@ -7,6 +7,12 @@ import (
 	"time"
 )
 
+type VideoInput struct {
+	Title       string
+	Description string
+	Duration    int64
+}
+
 type UserSignUpInput struct {
 	Username string
 	Email    string
@@ -14,21 +20,20 @@ type UserSignUpInput struct {
 }
 
 type UserSignInInput struct {
-	Username    string
+	Username string
 	Password string
 }
 
 type Tokens struct {
-     AccessToken  string
-     RefreshToken string
+	AccessToken  string
+	RefreshToken string
 }
 
-
 type Deps struct {
-	Repos *repository.Repositories
-	Hasher hash.PasswordHasher
-	TokenManager auth.TokenManager
-	AccessTokenTTL time.Duration
+	Repos           *repository.Repositories
+	Hasher          hash.PasswordHasher
+	TokenManager    auth.TokenManager
+	AccessTokenTTL  time.Duration
 	RefreshTokenTTL time.Duration
 	// Add other dependencies as needed
 }
@@ -36,15 +41,13 @@ type Deps struct {
 type Services struct {
 	// Add service methods here
 	VideoService *VideoService
-	Users *UsersService
-	
+	Users        *UsersService
 }
 
 func NewServices(deps *Deps) *Services {
-     return &Services{
+	return &Services{
 		VideoService: NewVideoService(deps.Repos.Videos),
 		Users: NewUsersService(deps.Repos.Users, deps.Hasher, deps.TokenManager,
 			deps.AccessTokenTTL, deps.RefreshTokenTTL),
-		
 	}
 }

@@ -17,6 +17,7 @@ type Config struct {
           Password string `yaml:"password"`
 	}
      Salt string `yaml:"salt"`
+     JWTSecret string `yaml:"jwt_secret"`
 }
 
 func LoadConfig(path string) *Config {

@@ -6,7 +6,7 @@ database :
   username : "postgres"
   password : "your_password"
   name : "your_database_name"
-salt : "nuziTheBest"
-jwt_secret : "jwtSecret_rmarsu"
+salt : "hjewbyfeibFNEebibfyeiH27"
+jwt_secret : "iefibeFEFhhgfeywE2121nvbhefey7f"
 
   

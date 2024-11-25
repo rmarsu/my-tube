@@ -1,3 +1,5 @@
+github.com/VandiKond/vanerrors v0.4.0 h1:ST8BqyGuLUNgRv9bd6uHuXXvcIH+BQurQeysP1S/EmA=
+github.com/VandiKond/vanerrors v0.4.0/go.mod h1:2l9cM0Z819aAhtL1Wy9ctxjzMZ29t1yMYbhFewoJHOs=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/golang-jwt/jwt/v5 v5.2.1 h1:OuVbFODueb089Lh128TAcimifWaLhJwVflnrgM17wHk=

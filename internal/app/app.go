@@ -15,17 +15,29 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/VandiKond/vanerrors"
 )
 
 func Run() {
+	// Setting default options
+	vanerrors.EmptyLoggerOptions.SetAsDefault()
+	options := vanerrors.Options{
+		ShowMessage: true,
+		ShowCause:   true,
+	}
+	options.SetAsDefault()
+
 	config := config.LoadConfig("configs/config.yaml")
 
 	db, err := database.Connect()
 	if err != nil {
+		err = vanerrors.NewWrap("database connection error", err, vanerrors.EmptyHandler)
 		log.Fatal(err)
 	}
 	err = migrations.InitTables(db)
 	if err != nil {
+		err = vanerrors.NewWrap("unable to init tables", err, vanerrors.EmptyHandler)
 		log.Fatal(err)
 	}
 	defer db.Close()
@@ -36,6 +48,7 @@ func Run() {
 	hasher := hash.NewSHA256Hasher(config.Salt)
 	tokenManager, err := auth.NewManager(config.JWTSecret)
 	if err != nil {
+		err = vanerrors.NewWrap("error creating token manager", err, vanerrors.EmptyHandler)
 		log.Fatal(err)
 	}
 
@@ -54,6 +67,7 @@ func Run() {
 	defer stop()
 
 	if err := server.Start(ctx); err != nil {
+		err = vanerrors.NewWrap("unable to start server", err, vanerrors.EmptyHandler)
 		log.Fatal(err)
 	}
 }

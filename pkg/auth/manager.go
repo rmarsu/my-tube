@@ -1,11 +1,11 @@
 package auth
 
 import (
-	"errors"
 	"fmt"
 	"math/rand"
 	"time"
 
+	"github.com/VandiKond/vanerrors"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -15,7 +15,7 @@ type MyCustomClaims struct {
 }
 
 var (
-	ErrInvalidCredentials = errors.New("invalid credentials")
+	ErrInvalidCredentials = vanerrors.NewName("invalid credentials", vanerrors.EmptyHandler)
 )
 
 type TokenManager interface {
@@ -30,7 +30,7 @@ type Manager struct {
 
 func NewManager(signingKey string) (*Manager, error) {
 	if signingKey == "" {
-		return nil, errors.New("empty signing key")
+		return nil, vanerrors.NewName("empty signing key", vanerrors.EmptyHandler)
 	}
 
 	return &Manager{signingKey: signingKey}, nil
@@ -43,20 +43,25 @@ func (m *Manager) NewJWT(userId string, ttl time.Duration) (string, error) {
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(ttl)),
 			Subject:   userId,
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			Issuer:   "myTube",
-			Audience: []string{"*"},
-			NotBefore: jwt.NewNumericDate(time.Now()),		
+			Issuer:    "myTube",
+			Audience:  []string{"*"},
+			NotBefore: jwt.NewNumericDate(time.Now()),
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	return token.SignedString([]byte(m.signingKey))
+	result, err := token.SignedString([]byte(m.signingKey))
+	if err != nil {
+		err = vanerrors.NewWrap("error to get singed string", err, vanerrors.EmptyHandler)
+		return result, err
+	}
+	return result, nil
 }
 
 func (m *Manager) Parse(accessToken string) (string, error) {
 	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (i interface{}, err error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			return nil, vanerrors.NewBasic("unexpected signing method", fmt.Sprint(token.Header["alg"]), vanerrors.EmptyHandler)
 		}
 
 		return []byte(m.signingKey), nil
@@ -67,7 +72,7 @@ func (m *Manager) Parse(accessToken string) (string, error) {
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return "", fmt.Errorf("error get user claims from token")
+		return "", vanerrors.NewName("error get user claims from token", vanerrors.EmptyHandler)
 	}
 
 	return claims["sub"].(string), nil
@@ -80,6 +85,7 @@ func (m *Manager) NewRefreshToken() (string, error) {
 	r := rand.New(s)
 
 	if _, err := r.Read(b); err != nil {
+		err = vanerrors.NewWrap("error to read new token", err, vanerrors.EmptyHandler)
 		return "", err
 	}
 
@@ -88,9 +94,10 @@ func (m *Manager) NewRefreshToken() (string, error) {
 
 func (m *Manager) ExtractUserIdFromToken(accessToken string) (string, error) {
 	userId, err := m.Parse(accessToken)
-     if err!= nil {
-          return "", err
-     }
+	if err != nil {
+		err = vanerrors.NewWrap("error to parse the access token", err, vanerrors.EmptyHandler)
+		return "", err
+	}
 
-     return userId, nil
+	return userId, nil
 }

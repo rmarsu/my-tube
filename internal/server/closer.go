@@ -3,8 +3,9 @@ package server
 import (
 	"context"
 	"fmt"
-	"strings"
 	"sync"
+
+	"github.com/VandiKond/vanerrors"
 )
 
 type Closer struct {
@@ -42,14 +43,15 @@ func (c *Closer) Close(ctx context.Context) error {
 	case <-complete:
 		break
 	case <-ctx.Done():
-		return fmt.Errorf("shutdown cancelled: %v", ctx.Err())
+		return vanerrors.NewWrap("shutdown cancelled", ctx.Err(), vanerrors.EmptyHandler)
 	}
 
 	if len(msgs) > 0 {
-		return fmt.Errorf(
-			"shutdown finished with error(s): \n%s",
-			strings.Join(msgs, "\n"),
-		)
+		var errStr string
+		for _, msg := range msgs {
+			errStr += "\n" + msg
+		}
+		return vanerrors.NewBasic("shutdown finished with error(s)", errStr, vanerrors.EmptyHandler)
 	}
 
 	return nil

@@ -6,6 +6,8 @@ import (
 	"mime/multipart"
 	"os"
 	"path/filepath"
+
+	"github.com/VandiKond/vanerrors"
 )
 
 func FileExists(path string) bool {
@@ -34,12 +36,14 @@ func SaveFile(file multipart.File, header *multipart.FileHeader) (string, error)
 
 	fileNew, err := os.Create(filePath)
 	if err != nil {
+		err = vanerrors.NewWrap("error to create a file", err, vanerrors.EmptyHandler)
 		return "", err
 	}
 	defer fileNew.Close()
 
 	// Implementing saving
 	if _, err := io.Copy(fileNew, file); err != nil {
+		err = vanerrors.NewWrap("error to copy data", err, vanerrors.EmptyHandler)
 		return "", err
 	}
 

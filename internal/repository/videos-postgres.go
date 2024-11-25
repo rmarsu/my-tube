@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"myTube/internal/models"
 
+	"github.com/VandiKond/vanerrors"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -31,13 +32,15 @@ func (r *VideosRepo) GetById(ctx context.Context, id int) (models.Video, error) 
 		&video.Filepath,
 	)
 	if err != nil {
+		err = vanerrors.NewWrap("error to get video", err, vanerrors.EmptyHandler)
 		return models.Video{}, err
 	}
 
 	updateQuery := `UPDATE videos SET views = views + 1 WHERE id = $1`
 	_, err = r.db.Exec(ctx, updateQuery, id)
 	if err != nil {
-		return video, fmt.Errorf("error updating view count: %v", err)
+		return video, vanerrors.NewWrap("error updating view count", err, vanerrors.EmptyHandler)
+
 	} else {
 		video.Views++
 	}
@@ -45,7 +48,8 @@ func (r *VideosRepo) GetById(ctx context.Context, id int) (models.Video, error) 
 	likesQuery := `SELECT COUNT(*) FROM likes WHERE video_id = $1`
 	err = r.db.QueryRow(ctx, likesQuery, id).Scan(&video.Likes)
 	if err != nil {
-		return video, fmt.Errorf("error counting likes: %v", err)
+		return video, vanerrors.NewWrap("error counting likes", err, vanerrors.EmptyHandler)
+
 	}
 
 	return video, nil
@@ -57,6 +61,7 @@ func (r *VideosRepo) GetTrendy(ctx context.Context) ([]models.Video, error) {
 
 	rows, err := r.db.Query(ctx, query)
 	if err != nil {
+		err = vanerrors.NewWrap("error to get trendy videos", err, vanerrors.EmptyHandler)
 		return nil, err
 	}
 	defer rows.Close()
@@ -75,12 +80,13 @@ func (r *VideosRepo) GetTrendy(ctx context.Context) ([]models.Video, error) {
 			&video.Filepath,
 		)
 		if err != nil {
+			err = vanerrors.NewWrap("error to scan video", err, vanerrors.EmptyHandler)
 			return nil, err
 		}
 		likesQuery := `SELECT COUNT(*) FROM likes WHERE video_id = $1`
 		err = r.db.QueryRow(ctx, likesQuery, video.ID).Scan(&video.Likes)
 		if err != nil {
-			return nil, fmt.Errorf("error counting likes: %v", err)
+			return nil, vanerrors.NewWrap("error counting likes", err, vanerrors.EmptyHandler)
 		}
 		videos = append(videos, video)
 	}
@@ -95,6 +101,7 @@ func (r *VideosRepo) Create(ctx context.Context, video models.Video) error {
 	err := r.db.QueryRow(ctx, query, video.AuthorID, video.Title, video.Description, video.CreatedAt,
 		video.Views, video.Thumbnail, video.Filepath).Scan(&video.ID)
 	if err != nil {
+		err = vanerrors.NewWrap("error creating a video", err, vanerrors.EmptyHandler)
 		return err
 	}
 	return nil
@@ -105,6 +112,7 @@ func (r *VideosRepo) Update(ctx context.Context, id int, video models.Video) err
 
 	_, err := r.db.Exec(ctx, query, video.Title, video.Description, video.Thumbnail, id)
 	if err != nil {
+		err = vanerrors.NewWrap("error updating a video", err, vanerrors.EmptyHandler)
 		return err
 	}
 	return nil
@@ -115,6 +123,7 @@ func (r *VideosRepo) Delete(ctx context.Context, id int) error {
 
 	_, err := r.db.Exec(ctx, query, id)
 	if err != nil {
+		err = vanerrors.NewWrap("error deleting a video", err, vanerrors.EmptyHandler)
 		return err
 	}
 	return nil
@@ -126,6 +135,7 @@ func (r *VideosRepo) Search(ctx context.Context, query string) ([]models.Video, 
 
 	rows, err := r.db.Query(ctx, searchQuery)
 	if err != nil {
+		err = vanerrors.NewWrap("error searching videos", err, vanerrors.EmptyHandler)
 		return nil, err
 	}
 	defer rows.Close()
@@ -142,12 +152,13 @@ func (r *VideosRepo) Search(ctx context.Context, query string) ([]models.Video, 
 			&video.Filepath,
 		)
 		if err != nil {
+			err = vanerrors.NewWrap("error to scan video", err, vanerrors.EmptyHandler)
 			return nil, err
 		}
 		likesQuery := `SELECT COUNT(*) FROM likes WHERE video_id = $1`
 		err = r.db.QueryRow(ctx, likesQuery, video.ID).Scan(&video.Likes)
 		if err != nil {
-			return nil, fmt.Errorf("error counting likes: %v", err)
+			return nil, vanerrors.NewWrap("error counting likes", err, vanerrors.EmptyHandler)
 		}
 		videos = append(videos, video)
 	}
@@ -159,6 +170,7 @@ func (r *VideosRepo) LikeVideo(ctx context.Context, videoID int, userID int) err
 
 	_, err := r.db.Exec(ctx, query, videoID, userID)
 	if err != nil {
+		err = vanerrors.NewWrap("error liking a video", err, vanerrors.EmptyHandler)
 		return err
 	}
 	return nil
@@ -169,6 +181,7 @@ func (r *VideosRepo) UnlikeVideo(ctx context.Context, videoID int, userID int) e
 
 	_, err := r.db.Exec(ctx, query, videoID, userID)
 	if err != nil {
+		err = vanerrors.NewWrap("error deleting a like from a video", err, vanerrors.EmptyHandler)
 		return err
 	}
 	return nil

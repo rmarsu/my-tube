@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/VandiKond/vanerrors"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -72,6 +73,7 @@ func InitTables(db *pgxpool.Pool) error {
           created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP);
 	`)
 	if err != nil {
+		err = vanerrors.NewWrap("unable to create tables", err, vanerrors.EmptyHandler)
 		return err
 	}
 	return nil
